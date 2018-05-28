@@ -1,0 +1,64 @@
+select ① from ② where ③
+  ①取得したいカラム名　縦軸
+  ②テーブル名
+  ③条件　横軸
+
+    e.g. id,feed,user_id,createdカラムを対象に全レコード取得
+
+      select `id`,`feed`,`user_id`,`created` from `feeds` where 1
+
+    e.g. 全カラムを対象にuser_idが13のみ取得
+
+      select * from `feeds` where `user_id`=13
+
+
+[テーブル結合　LEFT JOIN]
+主役テーブルを左に、参照したいテーブルを右に置くJOIN句
+
+構文：select ① from ② left join ③ on ④ where ⑤
+  ①取得したいカラム名
+  ②主役テーブル
+  ③参照テーブル
+  ④結合条件(外部キー使用)
+  ⑤条件
+  ※テーブルが複数出てくるため、カラム名の指定には`feed`.`id`のようにテーブル名からはじめ、ドットでつなぎカラム名を指定する。
+
+select * from `feeds` left join `users` on `feeds`.`user_id`=`users`.`id` where 1
+
+  ④結合条件テンプレート → `主役テーブル`.`外部キー`=`参照テーブル`.`主キー`    ←この並びは振れん
+    テーブルにあるキーについて
+      主キー：テーブル内で一意にである情報(絶対に被らんやつ)
+      外部キー：参照元の主キーと一致する情報、テーブル名単数形_参照の主キー
+
+    e.g. onのあとの結合条件のみ
+      主役テーブル：members
+      主キー：id
+      外部キー：tweet_id
+
+      参照テーブル：tweets
+      主キー：id
+
+      select ~ on `members`.`tweet_id`=`tweets`.`id`
+
+[カラムの制限]
+select `feeds`.*, `users`.`name`, `users`.`img_name` from `feeds` left join `users` on `feeds`.`user_id`=`users`.`id` where 1
+
+
+[テーブル名のエイリアス　AS句]
+使い方：`テーブル名` AS `別名`
+select * from `feed` as `f` left join `users` as `u`
+
+↓
+[バッククォートは省略可能]
+select f.*, u.name, u.img_name from feeds as f left join users as u on f.user_id = u.id where 1
+
+  別名のもう一つのメリット
+    likesテーブルから何件データが存在するかカウントする
+    select count(*) from `likes`
+
+        以下のような形の配列になってわかりにくい
+        array("count(*)"=>8)
+
+        select count(*) as `cnt` from `likes`   -> array("cnt"=>8)      名前がわかりやすくなる
+
+
