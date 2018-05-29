@@ -104,7 +104,22 @@
           }
 
 
-          $feeds[] = $record;
+          // いいね済みのリンクが押された時には、配列にすでにいいねしているものだけを代入する
+          if (isset($_GET["feed_select"])&&($_GET["feed_select"]=="likes")&&($record["like_flag"]==1)) {
+            $feeds[]=$record;
+          }
+
+          // feed_selectが指定されていない時は全件表示
+          if (!isset($_GET["feed_select"])) {
+            $feeds[]=$record;
+          }
+
+          // 新着順が押された時、全件表示
+          if (isset($_GET["feed_select"])&&($_GET["feed_select"]=="news")) {
+            $feeds[]=$record;
+          }
+
+          // $feeds[] = $record;
          
       }
       
@@ -161,9 +176,16 @@
     <div class="row">
       <div class="col-xs-3">
         <ul class="nav nav-pills nav-stacked">
-          <li class="active"><a href="timeline.php?feed_select=news">新着順</a></li>
-          <li><a href="timeline.php?feed_select=likes">いいね！済み</a></li>
-          <!-- <li><a href="timeline.php?feed_select=follows">フォロー</a></li> -->
+
+          <?php if (isset($_GET["feed_select"])&&($_GET["feed_select"]=="likes")) { ?>
+              <li><a href="timeline.php?feed_select=news">新着順</a></li>
+              <li class="active"><a href="timeline.php?feed_select=likes">いいね！済み</a></li>
+              <!-- <li><a href="timeline.php?feed_select=follows">フォロー</a></li> -->
+          <?php } else{ ?>
+              <li class="active"><a href="timeline.php?feed_select=news">新着順</a></li>
+              <li ><a href="timeline.php?feed_select=likes">いいね！済み</a></li>
+              <!-- <li><a href="timeline.php?feed_select=follows">フォロー</a></li> -->
+          <?php }?>
         </ul>
       </div>
       <div class="col-xs-9">
