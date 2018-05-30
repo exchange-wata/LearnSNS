@@ -24,30 +24,41 @@
               if ($record == false) {
                   break;
               }
-              $feeds[]=$record;
-        }
+              // $feeds[]=$record;
+        
 
-        // like数を取得するSQL文を作成
-          $feed_sql="SELECT COUNT(*) AS `feed_cnt` FROM `feeds` as f left join users as u on f.user_id = u.id";
-          $feed_data = array($record["id"]);          
-          
+          // コメント数を取得するSQL文を作成
+          $feed_sql="SELECT COUNT(*) AS `feed_cnt` 
+                     FROM `feeds`
+                     where `user_id`=?";
 
+          // 今回の$record["id"]はusers_idのもの
+          // timeline.phpのものと同じだが、別物
+          $feed_data = array($record["id"]); 
+
+        
           // SQL文を実行
           $feed_stmt = $dbh->prepare($feed_sql);
           $feed_stmt->execute($feed_data);
 
 
           // like数を取得
-          $user_feed=$feed_stmt->fetch(PDO::FETCH_ASSOC);
+          $feed_cnt=$feed_stmt->fetch(PDO::FETCH_ASSOC);
           
-          $record["feed_cnt"]=$user_feed["feed_cnt"];
+          $record["feed_cnt"]=$feed_cnt["feed_cnt"];
 
 
+
+          // 配列を追加代入する
+          $feeds[]=$record;
+
+          }
 
       // ↓データ保存した配列を表示で使用する
 
-
-
+// echo "<pre>";
+// var_dump($feeds);
+// echo "</pre>";
 ?>
 
 
@@ -115,9 +126,7 @@
             
             <div class="row feed_sub">
               <div class="col-xs-12">
-                <?php if (true) { ?>
-                <span class="comment_count">つぶやき数 : <?php echo $user_feed["feed_cnt"]; ?></span>
-                <?php } ?>
+                <span class="comment_count">つぶやき数 : <?php echo $feed["feed_cnt"]; ?></span>
               </div>
             </div>
           </div><!-- thumbnail -->
