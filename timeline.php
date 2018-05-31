@@ -40,6 +40,9 @@
 
       }
 
+
+//-----------pagingの処理------------
+      
       // ページ番号が入る変数
       $page=''; 
       // 1ページあたりに表示するデータの数
@@ -53,15 +56,50 @@
         $page=1;
       }
 
+      // これと同じことをしている関数
+      // if ($page<0) {
+      //   $page=1;
+      // }
+      // max:カンマ区切りで羅列された数字の中から最大数を返す=$pageとカンマ後の数字を比較
+      $page=max($page,1);
+
+
+      // データの件数から、最大ページ数を計算する
+      $sql_cnt="select count(*) as cnt
+                from feeds";
+
+      // SQL文を実行
+      $stmt_count = $dbh->prepare($sql_cnt);
+      $stmt_count->execute();
+      
+      $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+
+      // ページ数を計算
+      // ceil 小数点の切り上げができる関数　2.1->3として扱う
+      $all_page_number=ceil($record_cnt['cnt']/$page_row_number);
+
       // データ取得の開始番号を計算
       $start=($page-1)*$page_row_number;
+
+
+      // 不正に大きい数を指定された場合、最大ページ番号に変換
+      // if ($page>$all_page_number) {
+      //    $page=$all_page_number;
+      //   }  
+      // 上記内容を同じことができる関数min:カンマ区切りの数字の中から最小の数値を取得する
+      $page=min($page,$all_page_number);
 
 
       // 検索ボタンが押されたら曖昧検索
       // 検索ボタンが押されたら=GET送信されたsearch_wordというキーのデータを有する
       if (isset($_GET['search_word'])==true) {
           // 曖昧検索用SQL(like演算子を使う)
-          $sql = 'select f.*, u.name, u.img_name from feeds as f left join users as u on f.user_id = u.id where f.feed like"%'.$_GET['search_word'].'%" order by f.created desc';
+          $sql = 'select f.*, u.name, u.img_name 
+                  from feeds as f 
+                  left join users as u 
+                  on f.user_id = u.id 
+                  where f.feed like"%'.$_GET['search_word'].'%" 
+                  order by f.created desc';
         }
 
       else{
@@ -144,7 +182,7 @@
          
       }
       
-echo $page;     
+// echo $page;     
 ?>
 
 <!DOCTYPE html>
@@ -288,21 +326,31 @@ echo $page;
           </li>
         <?php }else{ ?>
             <li class="previous">
-              <a href="timeline.php?page=<?php echo $page-1; ?>">Newer 
-                <span aria-hidden="true">&larr;</span>
+              <a href="timeline.php?page=<?php echo $page-1; ?>"><span aria-hidden="true">&larr;</span>Newer
               </a>
             </li>
-        </div>
         <?php } ?>
+
+        <?php if ($page==$all_page_number) { ?>
+            <li class="next disabled">
+              <a href="#">Older
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+        <?php }else{ ?>
             <li class="next">
               <a href="timeline.php?page=<?php echo $page+1; ?>">Older
                 <span aria-hidden="true">&rarr;</span>
               </a>
             </li>
+        <?php } ?>
           </ul>
       </div>
     </div>
   </div>
+  
+
+
   <script src="assets/js/jquery-3.1.1.js"></script>
   <script src="assets/js/jquery-migrate-1.4.1.js"></script>
   <script src="assets/js/bootstrap.js"></script>
