@@ -5,6 +5,8 @@
 // db connect
     require('dbconnect.php');
 
+
+// ------------サインインしとるユーザーの表示---------
 // select→ users table $_SESSIONに保存されているidを使って一件だけ取り出す
     $sql = 'SELECT * FROM `users` WHERE `id`=?';
     $data = array($_SESSION['id']);
@@ -14,8 +16,9 @@
 // $signin_userに取り出したレコードを代入
     $signin_user =  $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $errors = array();
 
+//---------- 投稿に関して-----------
+    $errors = array();
 
     // ボタン押した時
     if(!empty($_POST)){
@@ -75,7 +78,7 @@
       $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
 
       // ページ数を計算
-      // ceil 小数点の切り上げができる関数　2.1->3として扱う
+      // ceil 少数点の切り上げができる関数　2.1->3として扱う
       $all_page_number=ceil($record_cnt['cnt']/$page_row_number);
 
       // データ取得の開始番号を計算
@@ -90,7 +93,7 @@
       $page=min($page,$all_page_number);
 
 
-      // 検索ボタンが押されたら曖昧検索
+//-------- 検索ボタンが押されたら曖昧検索----------
       // 検索ボタンが押されたら=GET送信されたsearch_wordというキーのデータを有する
       if (isset($_GET['search_word'])==true) {
           // 曖昧検索用SQL(like演算子を使う)
@@ -117,14 +120,46 @@
       $data = array();
       $stmt = $dbh->prepare($sql);
       $stmt->execute($data);
-      $feeds = array();
       
 
+//-----------feedsの配列を用意-----------
+      $feeds = array();
+      
       while (true) {
           $record = $stmt->fetch(PDO::FETCH_ASSOC);
           if ($record == false) {
               break;
           }
+
+          // comment テーブルから今取得できているfeedに対してのデータを取得
+          $comment_sql='select c.*, u.name, u.img_name
+                        from comments as c
+                        left join users as u 
+                        on c.user_id=u.id
+                        where feed_id=?';
+          $comment_data=array($record["id"]);
+
+          // sql文実行
+          $comment_stmt = $dbh->prepare($comment_sql);
+          $comment_stmt->execute($comment_data);
+
+          $comments_array=array();
+
+
+          while (true) {
+            $comment_record=$comment_stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($comment_record==false) {
+              break;
+            }
+
+            // 取得したコメントのデータを追加代入(重要！)
+            $comments_array[]=$comment_record;
+          }
+
+          // 一行文の変数(連想配列)に、新しくcommentsというキーを追加し、コメント情報を代入(超重要！)
+          $record["comments"]=$comments_array;
+
 
           // like数を取得するSQL文を作成
           $like_sql="SELECT COUNT(*) AS `like_cnt` FROM `likes` WHERE `feed_id`=?";
@@ -182,7 +217,11 @@
          
       }
       
-// echo $page;     
+// echo $page;  
+
+// echo "<pre>";
+// var_dump($feeds);
+// echo "</pre>";   
 ?>
 
 <!DOCTYPE html>
@@ -194,6 +233,7 @@
   <link rel="stylesheet" type="text/css" href="assets/font-awesome/css/font-awesome.css">
   <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
+
 <body style="margin-top: 60px; background: #E4E6EB;">
   <div class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -221,7 +261,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="user_profile_img/<?php echo $signin_user['img_name']; ?>" width="18" class="img-circle"><?php echo $signin_user['name']; ?><span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="#">マイページ</a></li>
+              <li><a href="profile.php?user_id=<?php echo $signin_user["id"]; ?>">マイページ</a></li>
               <li><a href="signout.php">サインアウト</a></li>
             </ul>
           </li>
@@ -279,7 +319,7 @@
             </div>
             <div class="row feed_sub">
               <div class="col-xs-12">
-<!--                 <form method="POST" action="" style="display: inline;">
+                <!-- <form method="POST" action="" style="display: inline;">
                   <input type="hidden" name="feed_id" >
                   
                     <input type="hidden" name="like" value="like"> -->
@@ -297,8 +337,19 @@
                 <span class="like_count">いいね数：<?php echo $feed["like_cnt"]; ?></span>
                 <?php } ?>  
 
-                <span class="comment_count">コメント数 : 9</span>
                 
+                <a href="#collapseComment<?php echo $feed["id"]; ?>" data-toggle="collapse" aria-expanded="false">
+
+                  <?php if ($feed["comment_count"]==0) {?>
+                  <span class="comment_count">コメント</span>
+                  <?php }else{?>
+                  <span class="comment_count">コメント数：<?php echo $feed["comment_count"]; ?></span>
+                  <?php } ?>
+
+                </a>
+                
+
+
                 <?php 
                     if ($feed["user_id"]==$_SESSION["id"]) {
                        
@@ -310,6 +361,12 @@
                 <?php } ?>
      
               </div>
+              <!-- コメントが押されたら表示される領域 -->
+                <!-- <div class="collapse" id="collapseComment">
+                    表示の確認              
+                </div> -->
+                <?php include("comment_view.php") ?>
+
             </div>
           </div>
           <?php } ?>

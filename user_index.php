@@ -54,6 +54,8 @@
 
           }
 
+  
+
       // ↓データ保存した配列を表示で使用する
 
 // echo "<pre>";
@@ -118,9 +120,9 @@
               <div class="col-xs-1">
                 <img src="user_profile_img/<?php echo $feed['img_name']; ?>" width="80">
               </div>
-              <div class="col-xs-11">
-                <?php echo $feed['name']; ?><br>
-                <a href="#" style="color: #7F7F7F;"><?php echo $feed['created']; ?></a>
+              <div class="col-xs-11"><a href="profile.php?user_id=<?php echo $feed['id']; ?>">
+                <?php echo $feed['name']; ?></a><br>
+                <span style="color: #7F7F7F;"><?php echo $feed['created']; ?></span>
               </div>
             </div>
             

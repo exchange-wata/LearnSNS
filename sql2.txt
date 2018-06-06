@@ -1,0 +1,53 @@
+<!-- 全件取得 -->
+select * from feeds order by created desc
+
+$pageに今表示させるページ番号が代入されている,ページ番号スタート
+$page=1 <!-- 1ページ目 -->
+$page=2 <!-- 2ページ目 -->
+$page=3 <!-- 3ページ目 -->
+
+$start=($page-1)*5
+
+
+<!-- 最初の5件を取得 -->
+select * from feeds 
+order by created desc
+limit 0,5    <!-- カンマで区切る -->
+
+<!-- limit句の使い方 -->
+limit 取得を開始したい場所　(0から始まる),取得したい件数
+
+<!-- 次の5件を取得 -->
+select * from feeds 
+order by created desc
+limit 5,5 <!-- 始めの1個目のデータは0番目、という扱いのため、5から始める -->
+
+<!-- その次の5件を取得 -->
+select * from feeds 
+order by created desc
+limit 10,5
+
+5/30にやったこと
+・ページによって表示するデータを変えるために取得するSQLを変える(limit句を使う)
+・olderとnewerボタンのリンク作成
+
+今後
+・older,newerのボタンを押して欲しくない時にはdisabledを追加するという条件分岐を追加
+・不正なページ番号を指定された場合の対処
+	正常
+	http://localhost/batch41_Web/LearnSNS/timeline.php?page=2    
+	不正
+	http://localhost/batch41_Web/LearnSNS/timeline.php?page=-1    
+	不正(100ページも存在せん時)
+	http://localhost/batch41_Web/LearnSNS/timeline.php?page=100 
+
+
+ファイルを読み込んで実行できる関数
+・require
+	動作：エラーが起きた時に、処理を中断し、読み込み側のその後の処理も行わない
+	利用時：DBに接続など、エラーが起きたら致命的な処理の場合使用(その後の処理を行ってもあまり意味がない)
+
+・include
+	動作：エラーが起きた時に、処理を継続し、読み込み側のその後の処理も継続する
+	利用時：HTMLなど表示を行う時に使用(多少のエラーが起きても全体的に処理を行った方がユーザーに対してメリットがある場合)
+
