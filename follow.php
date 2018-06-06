@@ -10,8 +10,8 @@
 // feed_idを取得 <-GET送信で送られてきとる前提
 	$user_id=$_GET["user_id"];
 
-	var_dump($_GET);
-	var_dump($_SESSION);
+	// var_dump($_GET);
+	// var_dump($_SESSION);
 
 // データを増やす=>insert
 // SQL文作成
@@ -25,6 +25,6 @@
 
 
 // 一覧に戻る
-	header("Location:timeline.php");
+	header("Location:profile.php?user_id=".$user_id);
 
 ?>
