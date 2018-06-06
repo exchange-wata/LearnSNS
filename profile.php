@@ -33,7 +33,7 @@
    
 
     // Follower一覧の取得
-    // 今表示されているプロフィールページの人が、フォローしとる
+    // 今表示されているプロフィールページの人のフォロワー
     $follower_sql='select fw.*, u.name, u.img_name, u.created
                     from followers as fw
                     left join users as u
@@ -46,11 +46,19 @@
 
     $followers=array();
 
+    // ログインユーザーが今見ているプロフィールページの人をフォローしてたら1,フォローしてなかったら0
+    $follow_flag=0;
+
     while(true){
         $follower_record =  $follower_stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($follower_record==false) {
           break;
+        }
+
+        // 任意のフォロワーの中に、ログインしている人とフォロワーが一致しているかをチェック->重複していたらフォロー解除のボタン表示
+        if ($follower_record["follower_id"]==$_SESSION["id"]) {
+          $follow_flag=1;
         }
 
         $followers[]=$follower_record;
@@ -141,8 +149,17 @@
       <div class="col-xs-3 text-center">
         <img src="user_profile_img/<?php echo $profile_user['img_name']; ?>" class="img-thumbnail" />
         <h2><?php echo $profile_user['name']; ?></h2>
-        <a href="follow.php?user_id=<?php echo $profile_user["id"]; ?>">
-        <button class="btn btn-default btn-block">フォローする</button></a>
+        
+        <?php if ($user_id!=$_SESSION["id"]) { ?>
+          <?php if($follow_flag==0){?>
+            <a href="follow.php?user_id=<?php echo $profile_user["id"]; ?>">
+            <button class="btn btn-default btn-block">フォローする</button></a>
+
+          <?php }else{ ?>
+            <button class="btn btn-default btn-block">フォローを解除する</button>
+          <?php } ?>
+        <?php } ?>
+
       </div>
 
       <div class="col-xs-9">
