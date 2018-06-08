@@ -3,18 +3,37 @@
     session_start();
 
 // db connect
+    // 処理を実行
     require('dbconnect.php');
+
+    // 関数の宣言のみ。処理の実行はなし
+    require('function.php');
 
 
 // ------------サインインしとるユーザーの表示---------
 // select→ users table $_SESSIONに保存されているidを使って一件だけ取り出す
-    $sql = 'SELECT * FROM `users` WHERE `id`=?';
-    $data = array($_SESSION['id']);
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute($data);
+    // $sql='SELECT * FROM `users` WHERE `id`=?';
+    // $data=array($_SESSION['id']);
+    // $stmt=$dbh->prepare($sql);
+    // $stmt->execute($data);
   
 // $signin_userに取り出したレコードを代入
-    $signin_user =  $stmt->fetch(PDO::FETCH_ASSOC);
+    // $signin_user=$stmt->fetch(PDO::FETCH_ASSOC);
+
+
+// ログイン済みかチェックし、未ログインであればログイン画面に戻す
+    // if (!isset($_SESSION)["id"]) {
+    //   header("Location:signin.php");
+    //   exit();//このタイミングで処理を中断する
+    // }
+
+    // 任意のタイミングで処理を実行可能
+    check_signin($_SESSION["id"]);
+    // 戻り値がない場合、代入の形で書かなくて良い
+
+    
+    $signin_user=get_user($dbh,$_SESSION["id"]);
+
 
 
 //---------- 投稿に関して-----------
@@ -235,40 +254,7 @@
 </head>
 
 <body style="margin-top: 60px; background: #E4E6EB;">
-  <div class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse1" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">Learn SNS</a>
-      </div>
-      <div class="collapse navbar-collapse" id="navbar-collapse1">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="#">タイムライン</a></li>
-          <li><a href="user_index.php">ユーザー一覧</a></li>
-        </ul>
-        <form method="GET" action="" class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input type="text" name="search_word" class="form-control" placeholder="投稿を検索">
-          </div>
-          <button type="submit" class="btn btn-default">検索</button>
-        </form>
-        <ul class="nav navbar-nav navbar-right">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="user_profile_img/<?php echo $signin_user['img_name']; ?>" width="18" class="img-circle"><?php echo $signin_user['name']; ?><span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="profile.php?user_id=<?php echo $signin_user["id"]; ?>">マイページ</a></li>
-              <li><a href="signout.php">サインアウト</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
+  <?php include("navbar.php"); ?>
 
   <div class="container">
     <div class="row">
