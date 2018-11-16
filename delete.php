@@ -18,5 +18,7 @@
 // 一覧に戻る
   	header("Location:timeline.php");
 
+// 処理した記述しない、もしくはhtmlも記述しないphpは閉じタグが不要
+
 ?>
 
