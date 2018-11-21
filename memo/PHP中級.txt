@@ -32,3 +32,29 @@
 		$num = ceil(1.1);
 		$numは2となる
 		
+
+// 留学中のやつ
+      // データの件数から、最大ページ数を計算する
+      // $sql_cnt="select count(*) as cnt
+      //           from feeds";
+
+      // // SQL文を実行
+      // $stmt_count = $dbh->prepare($sql_cnt);
+      // $stmt_count->execute();
+      
+      // $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+
+      // // ページ数を計算
+      // // ceil 少数点の切り上げができる関数　2.1->3として扱う
+      // $all_page_number=ceil($record_cnt['cnt']/$page_row_number);
+
+      // // データ取得の開始番号を計算
+      // $start=($page-1)*$page_row_number;
+
+
+      // // 不正に大きい数を指定された場合、最大ページ番号に変換
+      // // if ($page>$all_page_number) {
+      // //    $page=$all_page_number;
+      // //   }  
+      // // 上記内容を同じことができる関数min:カンマ区切りの数字の中から最小の数値を取得する
+      // $page=min($page,$all_page_number);

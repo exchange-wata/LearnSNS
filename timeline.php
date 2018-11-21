@@ -66,9 +66,11 @@
 //-----------pagingの処理------------
       
       // ページ番号が入る変数
-      $page=''; 
+      // $page=''; 
       // 1ページあたりに表示するデータの数
-      $page_row_number=5;
+      // $page_row_number=5;
+      const CONTENT_PER_PAGE = 5;
+
 
       if (isset($_GET['page'])) {
         $page=$_GET['page'];          
@@ -78,38 +80,42 @@
         $page=1;
       }
 
+  // インターン中のやつ(timeline_page.php)
+
       // これと同じことをしている関数
       // if ($page<0) {
       //   $page=1;
       // }
       // max:カンマ区切りで羅列された数字の中から最大数を返す=$pageとカンマ後の数字を比較
       $page=max($page,1);
-
-
-      // データの件数から、最大ページ数を計算する
-      $sql_cnt="select count(*) as cnt
-                from feeds";
-
-      // SQL文を実行
-      $stmt_count = $dbh->prepare($sql_cnt);
+      $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
+      $stmt_count = $dbh->prepare($sql_count);
       $stmt_count->execute();
-      
       $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+   
+      // 最後のページ数を取得
+      // 最後のページ　＝取得したページ/1ページあたりのページ数
+      $last_page = ceil($record_cnt['cnt']/CONTENT_PER_PAGE);
 
-      // ページ数を計算
-      // ceil 少数点の切り上げができる関数　2.1->3として扱う
-      $all_page_number=ceil($record_cnt['cnt']/$page_row_number);
+      // 最後のページより大きい値を渡された際の対策
+      $page = min($page, $last_page);
 
-      // データ取得の開始番号を計算
-      $start=($page-1)*$page_row_number;
+      $start = ($page -1) * CONTENT_PER_PAGE;
+
+      // feedsテーブルのレコードを取得
+      // COUNT() レコードの数を集計するSQL
+      // $sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
+      $sql = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
+                      FROM `feeds` AS `f` 
+                      LEFT JOIN `users` AS `u` 
+                      ON `f`.`user_id` = `u`.`id` 
+                      ORDER BY `f`.`created` DESC LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute();
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+      // $cnt = $result['cnt'];
 
 
-      // 不正に大きい数を指定された場合、最大ページ番号に変換
-      // if ($page>$all_page_number) {
-      //    $page=$all_page_number;
-      //   }  
-      // 上記内容を同じことができる関数min:カンマ区切りの数字の中から最小の数値を取得する
-      $page=min($page,$all_page_number);
 
 
 //-------- 検索ボタンが押されたら曖昧検索----------
@@ -133,7 +139,7 @@
                   left join users as u 
                   on f.user_id = u.id 
                   where 1 order by created desc 
-                  limit $start,$page_row_number";
+                  limit $start,$last_page";
       }
   
       $data = array();
@@ -362,19 +368,21 @@
           <ul class="pager">
         <?php if ($page==1) {?>
           <li class="previous disabled">
-            <a href="timeline.php?page=<?php echo $page-1; ?>" disabled>
+            <a href="timeline.php?page=<?php echo $page-1; ?>">
               <span aria-hidden="true">&larr;</span>
               Newer
             </a>
           </li>
         <?php }else{ ?>
             <li class="previous">
-              <a href="timeline.php?page=<?php echo $page-1; ?>"><span aria-hidden="true">&larr;</span>Newer
+              <a href="timeline.php?page=<?php echo $page-1; ?>">
+                <span aria-hidden="true">&larr;</span>
+                Newer
               </a>
             </li>
         <?php } ?>
 
-        <?php if ($page==$all_page_number) { ?>
+        <?php if ($page==$last_page) { ?>
             <li class="next disabled">
               <a href="#">Older
                 <span aria-hidden="true">&rarr;</span>
