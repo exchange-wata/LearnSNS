@@ -122,12 +122,20 @@
       // 検索ボタンが押されたら=GET送信されたsearch_wordというキーのデータを有する
       if (isset($_GET['search_word'])==true) {
           // 曖昧検索用SQL(like演算子を使う)
-          $sql = 'select f.*, u.name, u.img_name 
-                  from feeds as f 
-                  left join users as u 
-                  on f.user_id = u.id 
-                  where f.feed like"%'.$_GET['search_word'].'%" 
-                  order by f.created desc';
+          // $sql = 'select f.*, u.name, u.img_name 
+          //         from feeds as f 
+          //         left join users as u 
+          //         on f.user_id = u.id 
+          //         where f.feed like"%'.$_GET['search_word'].'%" 
+          //         order by f.created desc';
+          $sql = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
+                  FROM `feeds` AS `f` 
+                  LEFT JOIN `users` AS `u` 
+                  ON `f`.`user_id` = `u`.`id` 
+                  WHERE `f`.`feed` LIKE "%"?"%" 
+                  ORDER BY `f`.`created` DESC
+                  LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
+          $data = [$_GET['search_word']];
         }
 
       else{
@@ -140,9 +148,9 @@
                   on f.user_id = u.id 
                   where 1 order by created desc 
                   limit $start,$last_page";
+          $data = [];
       }
   
-      $data = array();
       $stmt = $dbh->prepare($sql);
       $stmt->execute($data);
       
