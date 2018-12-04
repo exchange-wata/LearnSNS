@@ -2,10 +2,12 @@
 session_start();
 require('dbconnect.php');
 
+// $data=array($comment,$signin_user,$feed_id);のところで必要
 $signin_user=$_SESSION["id"];
 $comment=$_POST["write_comment"];
 $feed_id=$_POST["feed_id"];
 
+// 必要な値を取得
 // コメントをinsertするSQL文作成
 $sql='insert into comments
 	  set comment=?,user_id=?,feed_id=?,created=now()';

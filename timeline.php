@@ -64,57 +64,44 @@
 
 
 //-----------pagingの処理------------
-      
-      // ページ番号が入る変数
-      // $page=''; 
-      // 1ページあたりに表示するデータの数
-      // $page_row_number=5;
-      const CONTENT_PER_PAGE = 5;
-
-
       if (isset($_GET['page'])) {
-        $page=$_GET['page'];          
+        $page = $_GET['page'];
+      } else {
+        $page = 1;
       }
-      else{
-        // get送信されているページがない場合、1ページ目とみなす
-        $page=1;
-      }
+ 
+      // 1ページあたりのページ数
+      const CONTENT_PER_PAGE = 4;
 
-  // インターン中のやつ(timeline_page.php)
-
-      // これと同じことをしている関数
-      // if ($page<0) {
-      //   $page=1;
-      // }
-      // max:カンマ区切りで羅列された数字の中から最大数を返す=$pageとカンマ後の数字を比較
-      $page=max($page,1);
-      $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
-      $stmt_count = $dbh->prepare($sql_count);
-      $stmt_count->execute();
-      $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
-   
-      // 最後のページ数を取得
-      // 最後のページ　＝取得したページ/1ページあたりのページ数
-      $last_page = ceil($record_cnt['cnt']/CONTENT_PER_PAGE);
-
-      // 最後のページより大きい値を渡された際の対策
-      $page = min($page, $last_page);
-
+      // -1などの不正な値を渡された時の対策
+      $page = max($page,1);
+      // スキップするレコード数を指定する
+      // スキップするレコード数 = (指定ページ　- 1) * 表示件数
       $start = ($page -1) * CONTENT_PER_PAGE;
 
       // feedsテーブルのレコードを取得
       // COUNT() レコードの数を集計するSQL
-      // $sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
-      $sql = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
-                      FROM `feeds` AS `f` 
-                      LEFT JOIN `users` AS `u` 
-                      ON `f`.`user_id` = `u`.`id` 
-                      ORDER BY `f`.`created` DESC LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
-      $stmt = $dbh->prepare($sql);
-      $stmt->execute();
-      $result = $stmt->fetch(PDO::FETCH_ASSOC);
-      // $cnt = $result['cnt'];
+      $sql_cnt = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
+      $stmt_cnt = $dbh->prepare($sql_cnt);
+      $stmt_cnt->execute();
+      $result_cnt = $stmt_cnt->fetch(PDO::FETCH_ASSOC);
 
+      // 1ページあたりに表示する投稿件数を指定する  
+      $sql_page = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
+                  FROM `feeds` AS `f` 
+                  LEFT JOIN `users` AS `u` 
+                  ON `f`.`user_id` = `u`.`id` 
+                  ORDER BY `f`.`created` DESC LIMIT ' . CONTENT_PER_PAGE .' OFFSET ' . $start;
+      $stmt_page = $dbh->prepare($sql_page);
+      $stmt_page->execute();
+      $result_page = $stmt_page->fetch(PDO::FETCH_ASSOC);
+      
+      // 最後のページ数を取得
+      // 最後のページ　＝取得したページ/1ページあたりのページ数
+      $last_page = ceil($result_cnt['cnt']/CONTENT_PER_PAGE);
+
+      // 最後のページより大きい値を渡された際の対策
+      $page = min($page, $last_page);
 
 
 
@@ -122,24 +109,22 @@
       // 検索ボタンが押されたら=GET送信されたsearch_wordというキーのデータを有する
       if (isset($_GET['search_word'])==true) {
           // 曖昧検索用SQL(like演算子を使う)
-          // $sql = 'select f.*, u.name, u.img_name 
-          //         from feeds as f 
-          //         left join users as u 
-          //         on f.user_id = u.id 
-          //         where f.feed like"%'.$_GET['search_word'].'%" 
-          //         order by f.created desc';
-          $sql = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
-                  FROM `feeds` AS `f` 
-                  LEFT JOIN `users` AS `u` 
-                  ON `f`.`user_id` = `u`.`id` 
-                  WHERE `f`.`feed` LIKE "%"?"%" 
-                  ORDER BY `f`.`created` DESC
-                  LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
-          $data = [$_GET['search_word']];
-        }
-
-      else{
-      
+          $sql = 'select f.*, u.name, u.img_name 
+                  from feeds as f 
+                  left join users as u 
+                  on f.user_id = u.id 
+                  where f.feed like"%'.$_GET['search_word'].'%" 
+                  order by f.created desc';
+          // $sql = 'SELECT `f`.*, `u`.`name`, `u`.`img_name` 
+          //         FROM `feeds` AS `f` 
+          //         LEFT JOIN `users` AS `u` 
+          //         ON `f`.`user_id` = `u`.`id` 
+          //         WHERE `f`.`feed` LIKE "%"?"%" 
+          //         ORDER BY `f`.`created` DESC
+          //         LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
+          // $data = [$_GET['search_word']];
+          // $data = [];
+        }else{
           // 通常、(検索ボタンを押してない)は全権取得
           // LEFT JOINで全件取得
           $sql = "select f.*, u.name, u.img_name 
@@ -148,9 +133,9 @@
                   on f.user_id = u.id 
                   where 1 order by created desc 
                   limit $start,$last_page";
-          $data = [];
       }
   
+      $data = [];
       $stmt = $dbh->prepare($sql);
       $stmt->execute($data);
       
@@ -164,13 +149,23 @@
               break;
           }
 
-          // comment テーブルから今取得できているfeedに対してのデータを取得
-          $comment_sql='select c.*, u.name, u.img_name
-                        from comments as c
-                        left join users as u 
-                        on c.user_id=u.id
-                        where feed_id=?';
-          $comment_data=array($record["id"]);
+          // 
+          // 
+          //  
+          // テーブルから今取得できているfeedに対してのデータを取得
+          // $comment_sql='select c.*, u.name, u.img_name
+          //               from comments as c
+          //               left join users as u 
+          //               on c.user_id=u.id
+          //               where feed_id=?';
+
+          $comment_sql = 'SELECT `c`.*, `u`.`name`, `u`.`img_name` 
+                          FROM `comments` AS `c` 
+                          LEFT JOIN `users` AS `u`  
+                          ON `c`.`user_id` = `u`.`id` 
+                          WHERE `c`.`feed_id` = ?';
+
+          $comment_data = array($record["id"]);
 
           // sql文実行
           $comment_stmt = $dbh->prepare($comment_sql);
@@ -374,23 +369,23 @@
 
       <div aria-label="Page navigation">
           <ul class="pager">
-        <?php if ($page==1) {?>
+        <?php if ($page == 1) {?>
           <li class="previous disabled">
-            <a href="timeline.php?page=<?php echo $page-1; ?>">
+            <a href="#">
               <span aria-hidden="true">&larr;</span>
               Newer
             </a>
           </li>
         <?php }else{ ?>
             <li class="previous">
-              <a href="timeline.php?page=<?php echo $page-1; ?>">
+              <a href="timeline.php?page=<?php echo $page - 1; ?>">
                 <span aria-hidden="true">&larr;</span>
                 Newer
               </a>
             </li>
         <?php } ?>
 
-        <?php if ($page==$last_page) { ?>
+        <?php if ($page == $last_page) { ?>
             <li class="next disabled">
               <a href="#">Older
                 <span aria-hidden="true">&rarr;</span>
@@ -398,7 +393,7 @@
             </li>
         <?php }else{ ?>
             <li class="next">
-              <a href="timeline.php?page=<?php echo $page+1; ?>">Older
+              <a href="timeline.php?page=<?php echo $page + 1; ?>">Older
                 <span aria-hidden="true">&rarr;</span>
               </a>
             </li>
