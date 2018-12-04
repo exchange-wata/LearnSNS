@@ -8,15 +8,6 @@
                   <br>
                   <?php } ?>
                   
-                  <!-- <img src="https://placehold.jp/40x40" width="40" class="img-circle">
-                  <span style="border-radius: 100px!important; -webkit-appearance:none;background-color:#eff1f3;padding:10px;margin-top:10px;"><a href="#">おもえもん</a> のびたくん。。。？</span>
-                  <br>
-                  
-                  <img src="https://placehold.jp/40x40" width="40" class="img-circle">
-                  <span style="border-radius: 100px!important; -webkit-appearance:none;background-color:#eff1f3;padding:10px;margin-top:10px;"><a href="#">おもえもん</a> のびたくん。。。？</span>
-                  <br>
-                   -->
-
                   <form method="post" class="form-inline" action="comment.php" role="comment">
                     <div class="form-group">
                       <img src="user_profile_img/<?php echo $signin_user['img_name']; ?>" width="40" class="img-circle">
