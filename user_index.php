@@ -87,7 +87,7 @@
           <div class="thumbnail">
             <div class="row">
               <div class="col-xs-1">
-                <img src="user_profile_img/<?php echo $feed['img_name']; ?>" width="80">
+                <img src="user_profile_img/<?php echo $feed['img_name']; ?>" width="80" class="user">
               </div>
               <div class="col-xs-11"><a href="profile.php?user_id=<?php echo $feed['id']; ?>">
                 <?php echo $feed['name']; ?></a><br>
