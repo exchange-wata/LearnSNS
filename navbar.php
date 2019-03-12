@@ -12,11 +12,11 @@
       
       <div class="collapse navbar-collapse" id="navbar-collapse1">
         <ul class="nav navbar-nav">
-          <?php if (strpos($_SERVER['REQUEST_URI'], 'timeline_47.php') !== false): ?>
-            <li class="active"><a href="timeline_47.php">タイムライン</a></li>
+          <?php if (strpos($_SERVER['REQUEST_URI'], 'timeline.php') !== false): ?>
+            <li class="active"><a href="timeline.php">タイムライン</a></li>
             <li><a href="user_index.php">ユーザー一覧</a></li>
           <?php else: ?>
-            <li><a href="timeline_47.php">タイムライン</a></li>
+            <li><a href="timeline.php">タイムライン</a></li>
             <li class="active"><a href="user_index.php">ユーザー一覧</a></li>
           <?php endif; ?>
         </ul>

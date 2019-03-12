@@ -64,15 +64,15 @@
 
 
 //-----------pagingの処理------------
+ 
+      // 1ページあたりのページ数
+      const CONTENT_PER_PAGE = 5;
+
       if (isset($_GET['page'])) {
         $page = $_GET['page'];
       } else {
         $page = 1;
       }
- 
-      // 1ページあたりのページ数
-      const CONTENT_PER_PAGE = 4;
-
       // -1などの不正な値を渡された時の対策
       $page = max($page,1);
       // スキップするレコード数を指定する
@@ -314,46 +314,33 @@
             </div>
             <div class="row feed_sub">
               <div class="col-xs-12">
-                <!-- <form method="POST" action="" style="display: inline;">
-                  <input type="hidden" name="feed_id" >
-                  
-                    <input type="hidden" name="like" value="like"> -->
-
-                    <?php if ($feed["like_flag"]==0) {?>
-                    <a href="like.php?feed_id=<?php echo $feed["id"]; ?>">
-                    <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-up" aria-hidden="true"></i>いいね！</button></a>
-                    <?php }else{?>
-                      <a href="unlike.php?feed_id=<?php echo $feed["id"]; ?>">
-                    <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-down" aria-hidden="true"></i>いいね！を取り消す</button></a>
-                    <?php }?>
-                <!-- </form> -->
+                <?php if ($feed["user_id"]==$_SESSION["id"]) { ?>
+                  <a href="edit.php?feed_id=<?php echo $feed["id"]?>" class="btn btn-success btn-xs">編集</a>
+                  <a onclick="return confirm('本当に削除しますか？');" href="delete.php?feed_id=<?php echo $feed["id"]?>" class="btn btn-danger btn-xs">削除</a>
+                  <!-- 何を削除すべきかわからんくなるため、どのidのものを、削除更新するかを確かにする -->
+                  <!-- onclickで削除の確認表示 -->
+                <?php }else{?>
+                  <?php if ($feed["like_flag"]==0) {?>
+                  <a href="like.php?feed_id=<?php echo $feed["id"]; ?>">
+                  <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-up" aria-hidden="true"></i>いいね！</button></a>
+                  <?php }else{?>
+                    <a href="unlike.php?feed_id=<?php echo $feed["id"]; ?>">
+                  <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-thumbs-down" aria-hidden="true"></i>いいね！を取り消す</button></a>
+                  <?php }?>
+                <?php }?>
 
                 <?php if ($feed["like_cnt"]>0) { ?>
                 <span class="like_count">いいね数：<?php echo $feed["like_cnt"]; ?></span>
                 <?php } ?>  
-
                 
                 <a href="#collapseComment<?php echo $feed["id"]; ?>" data-toggle="collapse" aria-expanded="false">
-
                   <?php if ($feed["comment_count"]==0) {?>
                   <span class="comment_count">コメント</span>
                   <?php }else{?>
                   <span class="comment_count">コメント数：<?php echo $feed["comment_count"]; ?></span>
                   <?php } ?>
-
                 </a>
                 
-
-
-                <?php 
-                    if ($feed["user_id"]==$_SESSION["id"]) {
-                       
-                      ?>
-                  <a href="edit.php?feed_id=<?php echo $feed["id"]?>" class="btn btn-success btn-xs">編集</a>
-                  <a onclick="return confirm('本当に削除しますか？');" href="delete.php?feed_id=<?php echo $feed["id"]?>" class="btn btn-danger btn-xs">削除</a>
-                  <!-- 何を削除すべきかわからんくなるため、どのidのものを、削除更新するかを確かにする -->
-                  <!-- onclickで削除の確認表示 -->
-                <?php } ?>
      
               </div>
               <!-- コメントが押されたら表示される領域 -->
