@@ -45,7 +45,7 @@ $errors = array();
           //SESSION変数にIDを保存
           $_SESSION['id'] = $record['id'];
           
-          header("Location: timeline_47.php");
+          header("Location: timeline.php");
           exit();
 
         }

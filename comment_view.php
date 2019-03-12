@@ -1,13 +1,16 @@
             <div class="collapse" id="collapseComment<?php echo $feed["id"]; ?>">
-                <div class="col-xs-12" style="margin-top:10px;">
-                  
+                <div class="col-xs-12" style="margin-top:10px;">                  
                   <!-- $feed["comment"]=コメント情報が配列の形で入ってる -->
                   <?php foreach ($feed["comments"] as $comment) { ?>
                   <img src="user_profile_img/<?php echo $comment['img_name']; ?>" width="40" class="img-circle">
-                  <span style="border-radius: 100px!important; -webkit-appearance:none;background-color:#eff1f3;padding:10px;margin-top:10px;"><a href="profile.php?user_id=<?php echo $comment['user_id']; ?>"><?php echo $comment['name']; ?></a><?php echo $comment["comment"]; ?></span>
+                  <span style="border-radius: 100px!important; -webkit-appearance:none;background-color:#eff1f3;padding:10px;margin-top:10px;">
+                    <a href="profile.php?user_id=<?php echo $comment['user_id']; ?>">
+                      <?php echo $comment['name']; ?>
+                    </a>:
+                      <?php echo $comment["comment"]; ?>
+                  </span>
                   <br>
                   <?php } ?>
-                  
                   <form method="post" class="form-inline" action="comment.php" role="comment">
                     <div class="form-group">
                       <img src="user_profile_img/<?php echo $signin_user['img_name']; ?>" width="40" class="img-circle">
